@@ -6,6 +6,7 @@ import {
   increment,
   selectCount,
 } from "@/redux/counter/counterSlice";
+import SseExample from "@/app/sse/sseExample";
 
 function Counter() {
   const counter = useSelector(selectCount);
