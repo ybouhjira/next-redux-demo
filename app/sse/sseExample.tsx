@@ -1,13 +1,14 @@
 "use client";
 
 import { useDispatch, useSelector } from "react-redux";
-import { selectData } from "@/redux/sseSlice";
+import { selectData, selectStats } from "@/redux/sseSlice";
 import { getNumberAction } from "@/redux/sagas";
 
 export default function SseExample() {
   const dispatch = useDispatch();
 
   const data = useSelector(selectData);
+  const stats = useSelector(selectStats);
 
   return (
     <div className="app">
@@ -17,7 +18,8 @@ export default function SseExample() {
       >
         add
       </button>
-      <div className="flex w-full absolute top-0 pointer-events-none">
+      <pre>{JSON.stringify(stats)}</pre>
+      <div className="flex w-full absolute top-0 pointer-events-none mt-[20px]">
         {Object.entries(data).map(([id, stream], streamIndex) => (
           <div
             key={id}

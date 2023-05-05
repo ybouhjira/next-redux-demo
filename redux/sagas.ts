@@ -1,11 +1,19 @@
-import { put, select, takeEvery } from "redux-saga/effects";
+import { all, put, select, takeEvery } from "redux-saga/effects";
 import { createAction } from "@reduxjs/toolkit";
 import { eventChannel } from "redux-saga";
+import { stat } from "fs";
 
 export const getNumberAction = createAction("GET_NUMBER");
 export const getNumberError = createAction("GET_NUMBER_ERROR", (error) => ({
   payload: { error },
 }));
+export const setStats = createAction(
+  "SET_STATS",
+  (stats: { max: number; min: number }) => ({
+    payload: { stats },
+  })
+);
+
 export const dataReceived = createAction(
   "DATA_RECEIVED",
   (data: number, streamID: number) => ({
@@ -49,7 +57,24 @@ function SSEEventChannelFactory(emitter: (data: any) => void) {
 }
 
 function* mySaga() {
-  yield takeEvery(getNumberAction, fetchUser);
+  yield all([
+    takeEvery(getNumberAction, fetchUser),
+    takeEvery(dataReceived, calculateStats),
+  ]);
+}
+
+function* calculateStats(action: ReturnType<typeof dataReceived>) {
+  const { data } = action.payload;
+  const stats: { min?: number; max?: number } = yield select(
+    (state) => state.sse.stats
+  );
+
+  yield put(
+    setStats({
+      min: !stats.min ? data : Math.min(stats.min, data),
+      max: !stats.max ? data : Math.max(stats.max, data),
+    })
+  );
 }
 
 export default mySaga;
